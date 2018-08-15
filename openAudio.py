@@ -19,7 +19,7 @@ def dft(data):
     return np.fft.fft(data)/len(data)
 
 def boost(x):
-    return math.pow(x, 0.66)
+    return math.pow(x, 0.8)
 
 class AudioData:
     def __init__(self, data_file):
@@ -54,14 +54,18 @@ class AudioData:
     def calc_freq_dist(self, bin, fourier=[]):
         if fourier == []:
             fourier = self.calc_fourier(bin)
-        fourier = [abs(c) for c in fourier]
-        fourier = [f/max(fourier) for f in fourier]
-        fourier = [boost(f) for f in fourier]
-        fourier = [fourier[:len(fourier)//2+1]]
-        return fourier[0]
+        amplitudes = [abs(c) for c in fourier]
+
+        amplitudes = amplitudes[:len(amplitudes)//2+1]
+        frequencies = self.frequencies
+        energies = [(frequencies[i]**2)/1e8*(amplitudes[i]**2) for i in range(len(amplitudes))]
+        scale_factor = np.sum(energies)
+        energies = [boost(f/scale_factor) for f in energies]
+
+        return energies
 
     def plot_freq_dist(self, start, stop):
-        freq_dists=[]
+        freq_dists = []
         for i in range(start, stop):
             freq_dists += [self.calc_freq_dist(i)]
         frequencies = [self.frequencies[:len(self.frequencies) // 2 + 1]]
@@ -75,7 +79,7 @@ class AudioData:
         y = np.array(frequencies).T
         x = np.arange(0, self.split_time * (w), self.split_time)
 
-        pcm = ax.pcolormesh(x, y, values, rasterized=True)  # you don't need rasterized=True
+        pcm = ax.pcolormesh(x, y, values, rasterized=True, cmap='nipy_spectral')  # you don't need rasterized=True
         fig.colorbar(pcm)
         plt.show()
 
@@ -101,6 +105,5 @@ class AudioData:
 
 song_data = AudioData("Songs/YOUTH.wav")
 song_data.split()
-index = 3
-ft = song_data.calc_fourier(index)
-song_data.plot_freq_dist(1000,2000)
+song_data.plot_freq_dist(0, 441)
+
