@@ -3,6 +3,10 @@ import numpy as np
 import cmath
 import math
 from matplotlib import pyplot as plt
+import winsound
+import time
+
+winsound.PlaySound("Songs/YOUTH.wav", winsound.SND_ASYNC)
 
 
 def dft(data):
@@ -77,11 +81,11 @@ class AudioData:
         fig, ax = plt.subplots(figsize=(9, 7))
         # Make one larger so these values represent the edge of the data pixels.
         y = np.array(frequencies).T
-        x = np.arange(0, self.split_time * (w), self.split_time)
+        x = np.arange(0, self.split_time * w, self.split_time)
 
         pcm = ax.pcolormesh(x, y, values, rasterized=True, cmap='nipy_spectral')  # you don't need rasterized=True
         fig.colorbar(pcm)
-        plt.show()
+        plt.show(block=True)
 
     def plot_fourier(self, bin, fourier=[]):
         if fourier == []:
@@ -105,5 +109,5 @@ class AudioData:
 
 song_data = AudioData("Songs/YOUTH.wav")
 song_data.split()
-song_data.plot_freq_dist(0, 441)
+song_data.plot_freq_dist(0, 50)
 
